@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project version="4">
-  <component name="fastRequestCurrentProjectConfig">
-    <option name="domain" value="http://127.0.0.1:8010" />
-    <option name="enableEnv" value="base_url" />
-    <option name="enableProject" value="hxds-mis-api" />
-  </component>
-</project>
