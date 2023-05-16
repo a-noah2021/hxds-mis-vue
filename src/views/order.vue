@@ -234,10 +234,10 @@ export default {
 		};
 	},
 	methods: {
-		
+
 	},
 	created: function() {
-		
+    this.loadDataList();
 	}
 };
 </script>
