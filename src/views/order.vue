@@ -234,7 +234,10 @@ export default {
 		};
 	},
 	methods: {
+	  loadDataList(){
+      let that = this;
 
+    }
 	},
 	created: function() {
     this.loadDataList();
