@@ -236,7 +236,9 @@ export default {
 	methods: {
 	  loadDataList(){
       let that = this;
+      let data = {
 
+      }
     }
 	},
 	created: function() {
