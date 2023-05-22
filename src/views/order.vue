@@ -237,7 +237,8 @@ export default {
 	  loadDataList(){
       let that = this;
       let data = {
-
+        page: that.pageIndex,
+        length: that.pageSize,
       }
     }
 	},
