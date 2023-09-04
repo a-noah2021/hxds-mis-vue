@@ -200,11 +200,125 @@ export default {
 		};
 	},
 	methods: {
-		
+    loadDataList: function() {
+      let that = this;
+      that.dataListLoading = true;
+      let data = {
+        page: that.pageIndex,
+        length: that.pageSize,
+        orderId: that.dataForm.orderId == '' ? null : that.dataForm.orderId,
+        driverId: that.dataForm.driverId == '' ? null : that.dataForm.driverId,
+        customerId: that.dataForm.customerId == '' ? null : that.dataForm.customerId,
+        rate: that.dataForm.rate == '' ? null : that.dataForm.rate,
+        status: that.dataForm.status == '' ? null : that.dataForm.status
+      };
+      if (that.dataForm.date != null && that.dataForm.date.length == 2) {
+        let startDate = that.dataForm.date[0];
+        let endDate = that.dataForm.date[1];
+        data.startDate = dayjs(startDate).format('YYYY-MM-DD');
+        data.endDate = dayjs(endDate).format('YYYY-MM-DD');
+      }
+
+      that.$http('comment/searchCommentByPage', 'POST', data, true, function(resp) {
+        let result = resp.result;
+        let list = result.list;
+        let status = {
+          '1': '未申诉',
+          '2': '已申诉',
+          '3': '申诉失败',
+          '4': '申诉成功'
+        };
+        let rate = {
+          '1': '差评',
+          '2': '差评',
+          '3': '中评',
+          '4': '中评',
+          '5': '好评'
+        };
+        for (let one of list) {
+          one.status = status[one.status + ''];
+          one.rate = rate[one.rate + ''];
+        }
+        that.dataList = list;
+        that.totalCount = Number(result.totalCount);
+        that.dataListLoading = false;
+      });
+    },
+    searchHandle: function() {
+      this.$refs['dataForm'].validate(valid => {
+        if (valid) {
+          this.$refs['dataForm'].clearValidate();
+          this.loadDataList();
+        } else {
+          return false;
+        }
+      });
+    },
+    sizeChangeHandle: function(val) {
+      this.pageSize = val;
+      this.pageIndex = 1;
+      this.loadDataList();
+    },
+    currentChangeHandle: function(val) {
+      this.pageIndex = val;
+      this.loadDataList();
+    },
+    showAcceptModel: function(id) {
+      this.acceptVisible = true;
+      this.commentId = id;
+    },
+    acceptHandle: function() {
+      let that = this;
+      let data = {
+        commentId: that.commentId
+      };
+      that.$http('comment/acceptCommentAppeal', 'POST', data, true, function(resp) {
+        that.acceptVisible = false;
+        that.$message.success('受理成功');
+        that.expands = [];
+        that.loadDataList();
+      });
+    },
+    handleAppeal: function() {
+      let that = this;
+      let data = {
+        commentId: that.commentId,
+        result: that.handleMode == 'yes' ? '同意' : '不同意',
+        note: that.note != null && that.note.length > 0 ? that.note : null,
+        instanceId: that.instanceId
+      };
+      that.$http('comment/handleCommentAppeal', 'POST', data, true, function(resp) {
+        that.handleVisible = false;
+        that.$message.success('执行成功');
+        that.expands = [];
+        that.loadDataList();
+      });
+    },
+    expand: function(row, expandedRows) {
+      let that = this;
+      if (expandedRows.length > 0) {
+        that.expands = [];
+        if (row) {
+          that.expands.push(row.orderId);
+          if (row.status != '未申诉') {
+            let data = {
+              instanceId: row.instanceId,
+              isEnd: row.status == '已申诉' ? false : true
+            };
+            that.$http('comment/searchAppealContent', 'POST', data, true, function(resp) {
+              row.reason = resp.result.reason;
+              row.note = resp.result.note;
+            });
+          }
+        } else {
+          that.expands = [];
+        }
+      }
+    }
 	},
-	created: function() {
-		
-	}
+  created: function() {
+    this.loadDataList();
+  }
 };
 </script>
 <style lang="less" scoped="scoped">
